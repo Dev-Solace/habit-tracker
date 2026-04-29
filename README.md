@@ -17,7 +17,7 @@ A simple, offline habit tracking web app built with vanilla HTML, CSS, and JavaS
 ## How to Use
 
 1. **Download**: Clone or download this repository
-2. **Open**: Double-click `tracker.html` to open in your browser
+2. **Open**: Double-click `index.html` to open in your browser
 3. **Start Tracking**: Enter your name, add habits, and start building better routines
 
 ### Adding a Habit
