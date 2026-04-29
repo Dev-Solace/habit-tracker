@@ -1,6 +1,6 @@
 # Habit Tracker
 
-**Try it out:** [Live Demo](https://dev-solace.github.io/habit-tracker/)
+**Try it out:** [Live Demo](https://personal-habit-tracker-app.vercel.app/)
 
 A simple, offline habit tracking web app built with vanilla HTML, CSS, and JavaScript. Track your daily habits, build streaks, set reminders, and visualize progress with a calendar view. No accounts or internet required — everything runs locally in your browser.
 
