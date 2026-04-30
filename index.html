@@ -677,7 +677,7 @@ window.onload = () => {
   if (raw) {
     const d = JSON.parse(raw);
     userName = d.userName || '';
-    habits = d.habits || [];
+    habits = (d.habits || []).map(normalizeHabit);
     notifiedToday = d.notifiedToday || {};
     if (userName) { enterAppDirect(); return; }
   }
@@ -688,7 +688,7 @@ window.onload = () => {
     const habitsData = localStorage.getItem(KEY_HABITS);
     if (habitsData) {
       const d = JSON.parse(habitsData);
-      habits = d.habits || [];
+      habits = (d.habits || []).map(normalizeHabit);
       notifiedToday = d.notifiedToday || {};
     }
   }
@@ -732,7 +732,7 @@ function enterApp() {
     const saved = localStorage.getItem(KEY_HABITS);
     if (saved) {
       const d = JSON.parse(saved);
-      habits = d.habits || [];
+      habits = (d.habits || []).map(normalizeHabit);
       notifiedToday = d.notifiedToday || {};
     }
   }
@@ -847,6 +847,24 @@ function save() {
   localStorage.setItem(KEY, JSON.stringify(payload));
   localStorage.setItem(KEY_HABITS, JSON.stringify({ habits, notifiedToday, lastDate: todayStr() }));
   localStorage.setItem(KEY_META, JSON.stringify({ hasData: true }));
+}
+
+function normalizeHabit(h) {
+  return {
+    id: h.id || Date.now(),
+    name: h.name || 'Untitled Habit',
+    freq: h.freq || 'daily',
+    customDays: Array.isArray(h.customDays) ? h.customDays : [],
+    targetTime: h.targetTime || '',
+    notifyTime: h.notifyTime || '',
+    notifyInterval: h.notifyInterval || '',
+    note: h.note || '',
+    completedToday: !!h.completedToday,
+    progress: Number(h.progress || 0),
+    streak: Number(h.streak || 0),
+    lastCompletedDate: h.lastCompletedDate || null,
+    history: h.history && typeof h.history === 'object' ? h.history : {},
+  };
 }
 
 // ─── FREQUENCY ────────────────────────────────────────────────────────────────
@@ -1096,7 +1114,7 @@ function render() {
           </div>
           <div class="habit-progress-track"><div class="habit-progress-fill" style="width:${prog}%"></div></div>
           <div class="pct-btns">
-            ${[0,25,50,75,100].map(p=>`<button class="pct-btn ${prog===p?'active':''}" onclick="setProgress(${h.id},${p})">${p}%</button>`).join('')}
+            ${[0,25,50,75,100].map(p=>`<button type="button" class="pct-btn ${prog===p?'active':''}" onclick="setProgress(${h.id},${p})">${p}%</button>`).join('')}
           </div>
         </div>
         <div style="margin-top:.75rem;">
