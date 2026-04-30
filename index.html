@@ -505,11 +505,10 @@ select.form-control option{background:var(--surface2);}
         </div>
         <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
         <div class="progress-milestones">
-          <div class="milestone" id="m25">25% ¼</div>
-          <div class="milestone" id="m50">50% ½</div>
-          <div class="milestone" id="m75">75% ¾</div>
-          <div class="milestone" id="m100">100% 🎉</div>
-        </div>
+        <button type="button" class="milestone" onclick="setProgressForSelected(25)">25% ¼</button>
+        <button type="button" class="milestone" onclick="setProgressForSelected(50)">50% ½</button>
+        <button type="button" class="milestone" onclick="setProgressForSelected(75)">75% ¾</button>
+        <button type="button" class="milestone" onclick="setProgressForSelected(100)">100% 🎉</button>
       </div>
 
       <div class="filter-bar">
@@ -664,6 +663,7 @@ let habits = [];
 let userName = '';
 let currentFilter = 'all';
 let editingId = null;
+let selectedHabitId = null;
 let calYear, calMonth;
 let selectedFreq = 'daily';
 let selectedDays = [];
@@ -1018,9 +1018,23 @@ function toggleExpand(id) {
   const det = document.getElementById(`detail-${id}`);
   const btn = document.getElementById(`expand-${id}`);
   if (det) {
-    det.classList.toggle('open');
+    const isOpen = det.classList.toggle('open');
     btn.classList.toggle('open');
+    selectedHabitId = isOpen ? id : null;
   }
+}
+
+function setProgressForSelected(pct) {
+  let targetId = selectedHabitId;
+  if (!targetId) {
+    const scheduled = habits.filter(isScheduledToday);
+    if (scheduled.length === 1) targetId = scheduled[0].id;
+  }
+  if (!targetId) {
+    showToast('⚠️', 'Open a habit first', 'Expand a habit and then choose a progress percentage.');
+    return;
+  }
+  setProgress(targetId, pct);
 }
 
 // ─── FILTER ───────────────────────────────────────────────────────────────────
