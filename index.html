@@ -451,6 +451,10 @@ select.form-control option{background:var(--surface2);}
           <div class="user-sub">Habit builder</div>
         </div>
       </div>
+      <button class="nav-btn" onclick="logout()" style="margin-top:1rem;color:var(--red);">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5m0 0l-5-5m5 5H9"/></svg>
+        Logout
+      </button>
     </div>
   </aside>
 
@@ -653,6 +657,21 @@ window.onload = () => {
   document.getElementById('name-input').addEventListener('keydown', e => { if(e.key==='Enter') enterApp(); });
 };
 
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('sidebar');
+  const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+  
+  if (sidebar && sidebar.classList.contains('open')) {
+    const isClickInsideSidebar = sidebar.contains(event.target);
+    const isClickOnMenuBtn = mobileMenuBtn && mobileMenuBtn.contains(event.target);
+    
+    if (!isClickInsideSidebar && !isClickOnMenuBtn) {
+      sidebar.classList.remove('open');
+    }
+  }
+});
+
 function makeStars() {
   const c = document.getElementById('stars');
   for (let i=0;i<80;i++) {
@@ -684,6 +703,22 @@ function enterAppDirect() {
   calYear = now.getFullYear(); calMonth = now.getMonth();
   populateCalSelect();
   renderCalendar();
+}
+
+function logout() {
+  if (confirm('Are you sure you want to logout?')) {
+    localStorage.removeItem(KEY);
+    userName = '';
+    habits = [];
+    notifiedToday = {};
+    editingId = null;
+    currentFilter = 'all';
+    if (notifyCheckInterval) clearInterval(notifyCheckInterval);
+    document.getElementById('page-app').classList.remove('active');
+    document.getElementById('page-onboard').classList.add('active');
+    document.getElementById('name-input').value = '';
+    document.getElementById('name-input').focus();
+  }
 }
 
 function applyUserName() {
