@@ -658,6 +658,8 @@ select.form-control option{background:var(--surface2);}
 <script>
 // ─── STATE ────────────────────────────────────────────────────────────────────
 const KEY = 'habitSpace_v3';
+const KEY_HABITS = 'habitSpace_v3_habits';
+const KEY_META = 'habitSpace_v3_meta';
 let habits = [];
 let userName = '';
 let currentFilter = 'all';
@@ -671,9 +673,6 @@ let notifiedToday = {}; // id -> set of times notified
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = () => {
   makeStars();
-  const KEY_HABITS = 'habitSpace_v3_habits';
-  const KEY_META = 'habitSpace_v3_meta';
-  
   const raw = localStorage.getItem(KEY);
   if (raw) {
     const d = JSON.parse(raw);
@@ -728,6 +727,16 @@ function enterApp() {
   const val = document.getElementById('name-input').value.trim();
   if (!val) { document.getElementById('name-input').focus(); return; }
   userName = val;
+  
+  if (!habits.length) {
+    const saved = localStorage.getItem(KEY_HABITS);
+    if (saved) {
+      const d = JSON.parse(saved);
+      habits = d.habits || [];
+      notifiedToday = d.notifiedToday || {};
+    }
+  }
+  
   checkNewDay();
   save();
   enterAppDirect();
@@ -748,17 +757,13 @@ function enterAppDirect() {
 
 function logout() {
   if (confirm('Are you sure you want to logout?')) {
-    // Save habits and metadata to preserve data
-    const KEY_HABITS = 'habitSpace_v3_habits';
-    const KEY_META = 'habitSpace_v3_meta';
+    // Keep habit data safe in backup storage
     localStorage.setItem(KEY_HABITS, JSON.stringify({ habits, notifiedToday, lastDate: todayStr() }));
     localStorage.setItem(KEY_META, JSON.stringify({ hasData: true }));
     
-    // Clear session data
+    // Clear only the session state
     localStorage.removeItem(KEY);
     userName = '';
-    habits = [];
-    notifiedToday = {};
     editingId = null;
     currentFilter = 'all';
     if (notifyCheckInterval) clearInterval(notifyCheckInterval);
@@ -838,7 +843,10 @@ function checkNewDay() {
 
 // ─── SAVE ─────────────────────────────────────────────────────────────────────
 function save() {
-  localStorage.setItem(KEY, JSON.stringify({ userName, habits, lastDate: todayStr(), notifiedToday }));
+  const payload = { userName, habits, lastDate: todayStr(), notifiedToday };
+  localStorage.setItem(KEY, JSON.stringify(payload));
+  localStorage.setItem(KEY_HABITS, JSON.stringify({ habits, notifiedToday, lastDate: todayStr() }));
+  localStorage.setItem(KEY_META, JSON.stringify({ hasData: true }));
 }
 
 // ─── FREQUENCY ────────────────────────────────────────────────────────────────
@@ -954,17 +962,19 @@ function toggleHabit(id) {
 }
 
 function setProgress(id, pct) {
-  const h = habits.find(x=>x.id===id);
-  if (!h) return;
+  const habitId = Number(id);
+  const progressPct = Number(pct);
+  const h = habits.find(x=>x.id===habitId);
+  if (!h || Number.isNaN(progressPct)) return;
   const today = todayStr();
-  h.progress = pct;
-  if (pct === 100 && !h.completedToday) {
+  h.progress = progressPct;
+  if (progressPct === 100 && !h.completedToday) {
     h.completedToday = true;
     h.lastCompletedDate === yesterdayStr() ? h.streak++ : (h.streak = 1);
     h.lastCompletedDate = today;
     h.history[today] = 'done';
     showToast('🎉', '100% done!', h.name);
-  } else if (pct < 100 && h.completedToday) {
+  } else if (progressPct < 100 && h.completedToday) {
     h.completedToday = false;
     h.history[today] = undefined;
     if (h.lastCompletedDate === today) {
