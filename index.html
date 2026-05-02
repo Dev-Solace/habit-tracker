@@ -660,6 +660,7 @@ select.form-control option{background:var(--surface2);}
 const KEY = 'habitSpace_v3';
 const KEY_HABITS = 'habitSpace_v3_habits';
 const KEY_META = 'habitSpace_v3_meta';
+const KEY_LAST_USER = 'habitSpace_v3_last_user';
 let habits = [];
 let userName = '';
 let currentFilter = 'all';
@@ -681,17 +682,6 @@ window.onload = () => {
     habits = (d.habits || []).map(normalizeHabit);
     notifiedToday = d.notifiedToday || {};
     if (userName) { enterAppDirect(); return; }
-  }
-  
-  // Check if there's saved data from a previous session
-  const habitsMeta = localStorage.getItem(KEY_META);
-  if (habitsMeta) {
-    const habitsData = localStorage.getItem(KEY_HABITS);
-    if (habitsData) {
-      const d = JSON.parse(habitsData);
-      habits = (d.habits || []).map(normalizeHabit);
-      notifiedToday = d.notifiedToday || {};
-    }
   }
   
   document.getElementById('name-input').focus();
@@ -728,8 +718,11 @@ function enterApp() {
   const val = document.getElementById('name-input').value.trim();
   if (!val) { document.getElementById('name-input').focus(); return; }
   userName = val;
-  
-  if (!habits.length) {
+
+  habits = [];
+  notifiedToday = {};
+  const lastUser = localStorage.getItem(KEY_LAST_USER) || '';
+  if (lastUser.toLowerCase() === userName.toLowerCase()) {
     const saved = localStorage.getItem(KEY_HABITS);
     if (saved) {
       const d = JSON.parse(saved);
@@ -737,7 +730,7 @@ function enterApp() {
       notifiedToday = d.notifiedToday || {};
     }
   }
-  
+
   checkNewDay();
   save();
   enterAppDirect();
@@ -758,12 +751,15 @@ function enterAppDirect() {
 
 function logout() {
   if (confirm('Are you sure you want to logout?')) {
-    // Keep habit data safe in backup storage
+    // Keep habit data safe in backup storage for the current user only
     localStorage.setItem(KEY_HABITS, JSON.stringify({ habits, notifiedToday, lastDate: todayStr() }));
     localStorage.setItem(KEY_META, JSON.stringify({ hasData: true }));
-    
+    localStorage.setItem(KEY_LAST_USER, userName);
+
     // Clear only the session state
     localStorage.removeItem(KEY);
+    habits = [];
+    notifiedToday = {};
     userName = '';
     editingId = null;
     currentFilter = 'all';
@@ -1243,10 +1239,13 @@ function showView(name, btn) {
 function populateCalSelect() {
   const sel = document.getElementById('cal-habit-select');
   const prev = sel.value;
-  sel.innerHTML = habits.length === 0
-    ? '<option value="">No habits yet</option>'
-    : habits.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join('');
-  if (prev && habits.find(x=>x.id==prev)) sel.value = prev;
+  if (habits.length === 0) {
+    sel.innerHTML = '<option value="">No habits yet</option>';
+    return;
+  }
+  sel.innerHTML = habits.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join('');
+  const keep = habits.find(x=>x.id==prev);
+  sel.value = keep ? keep.id : habits[0].id;
 }
 
 function calNav(dir) {
