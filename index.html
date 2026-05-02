@@ -808,15 +808,21 @@ function applyUserName() {
 }
 
 // ─── CLOCK ────────────────────────────────────────────────────────────────────
+function formatTime(d = new Date()) {
+  if (!d || isNaN(d.getTime())) return '00:00:00';
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 function startClock() {
   function tick() {
-    const t = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    const now = new Date();
+    const t = formatTime(now);
     const clock = document.getElementById('clock');
     if (clock) clock.textContent = t;
     const c2 = document.getElementById('clock2');
     if (c2) c2.textContent = t;
     const dateEl = document.getElementById('topbar-date');
-    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   }
   tick();
   if (window.habitClockInterval) clearInterval(window.habitClockInterval);
