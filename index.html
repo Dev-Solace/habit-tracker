@@ -8,7 +8,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#0a0e1a;
+  --bg: #0a0e1a;
   --bg2:#0f1526;
   --surface:#141b2e;
   --surface2:#1a2340;
@@ -398,9 +398,9 @@ select.form-control option{background:var(--surface2);}
         </div>
         <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
         <div class="progress-milestones">
-          <button type="button" class="milestone" id="m25" onclick="setProgressForSelected(25)">25% ¼</button>
-          <button type="button" class="milestone" id="m50" onclick="setProgressForSelected(50)">50% ½</button>
-          <button type="button" class="milestone" id="m75" onclick="setProgressForSelected(75)">75% ¾</button>
+          <button type="button" class="milestone" id="m25" onclick="setProgressForSelected(25)">25%</button>
+          <button type="button" class="milestone" id="m50" onclick="setProgressForSelected(50)">50%</button>
+          <button type="button" class="milestone" id="m75" onclick="setProgressForSelected(75)">75%</button>
           <button type="button" class="milestone" id="m100" onclick="setProgressForSelected(100)">100% 🎉</button>
         </div>
         <div class="filter-bar">
@@ -529,7 +529,10 @@ select.form-control option{background:var(--surface2);}
         <label>Reminder Interval (before deadline)</label>
         <select class="form-control" id="f-notify-interval">
           <option value="">No reminder</option>
+          <option value="5">5 min before</option>
           <option value="10">10 min before</option>
+          <option value="15">15 min before</option>
+          <option value="20">20 min before</option>
           <option value="30">30 min before</option>
           <option value="60">1 hour before</option>
           <option value="120">2 hours before</option>
@@ -1056,7 +1059,7 @@ function render() {
     const msgs = {
       all:{e:'✦',h:'No habits yet',p:'Click "+ New Habit" to get started.'},
       completed:{e:'🕐',h:'Nothing done yet',p:'Mark a habit as complete above.'},
-      pending:{e:'🎉',h:'All caught up!',p:"You've done everything scheduled today."},
+      pending:{e:'🤩',h:'heyyy!!!',p:"You've done everything scheduled today. I'm proud of you!"},
       daily:{e:'✦',h:'No daily habits',p:''},weekly:{e:'✦',h:'No weekly habits',p:''}
     };
     const m = msgs[currentFilter]||msgs.all;
